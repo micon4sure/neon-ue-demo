@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEON Demo</title>
+  <link href="bootstrap.css" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Bahnschrift', sans-serif;
+      font-weight: 100 !important;
+    }
+
+    html,
+    body {
+      background: transparent;
+    }
+
+    #initial {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="initial">
+    <h1>Please enter your name (press enter to submit)</h1>
+    <input type="text" id="name" placeholder="Your name">
+    <!-- <select id="difficulty">
+      <option value="easy">Easy</option>
+      <option value="medium">Medium</option>
+      <option value="hard">Hard</option>
+    </select> -->
+  </div>
+
+  <div id="game">
+    <h1>Shots fired: <span id="shots-fired">0</span></h1>
+    <h1>Last jump at location <span id="jump-location">0,0</span></h1>
+    <h1>Invoke function result string: <span id="invoke-result">...</span></h1>
+  </div>
+</body>
+<script type="module">
+  import NEON from './neon.js';
+
+  NEON.setLoggingEnabled(false);
+
+  const nameInput = document.getElementById('name');
+  nameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      NEON.InvokeUnrealEvent('submitName', {
+        name: nameInput.value
+      });
+
+      document.getElementById('initial').style.display = 'none';
+      document.getElementById('game').style.display = 'block';
+
+      NEON.OnInvoke('shoot', () => {
+        const shotsFired = document.getElementById('shots-fired');
+        shotsFired.innerText = parseInt(shotsFired.innerText) + 1;
+      });
+
+      NEON.OnInvoke('jump', (data) => {
+        const jumpLocation = document.getElementById('jump-location');
+        jumpLocation.innerText = `${data.location.x},${data.location.y}`;
+      });
+
+      setInterval(async () => {
+        const result = await NEON.InvokeUnrealFunction('interval', {
+          inputMessage: 'Invoking'
+        });
+        document.getElementById('invoke-result').innerText = result.outputMessage;
+      }, 1000);
+    }
+  });
+</script>
+
+</html>
